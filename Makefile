@@ -18,8 +18,8 @@ run:
 	docker compose up -d --build $(svc)
 
 create-private-key:
-	openssl genrsa -out ./app/cert/$(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) 4096
-	openssl rsa -in ./app/cert/$(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) -pubout -out ./app/cert/$(BACKEND_TAKE_HOME_JWT_PUBLIC_KEY_PATH)
+	openssl genrsa -out $(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) 4096
+	openssl rsa -in $(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) -pubout -out $(BACKEND_TAKE_HOME_JWT_PUBLIC_KEY_PATH)
 
 create-public-key:
-	openssl rsa -in ./app/cert/$(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) -pubout -out ./app/cert/$(BACKEND_TAKE_HOME_JWT_PUBLIC_KEY_PATH)
+	openssl rsa -in $(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) -pubout -out $(BACKEND_TAKE_HOME_JWT_PUBLIC_KEY_PATH)
