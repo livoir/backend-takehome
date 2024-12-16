@@ -67,6 +67,8 @@ Ensure proper indexing for performance optimization.
 If you have Docker installed, you can start the app with the following commands:
 
 ```
+cat .env.example > .env
+make create-private-key
 docker-compose build
 docker-compose up
 ```
@@ -82,9 +84,11 @@ If you prefer to set up the web server manually, ensure you have the following p
 
 Once the prerequisites are ready:
 
-1. Install [Air](https://github.com/air-verse/air), a live reload tool for Go.
-2. Navigate to the `./app` directory.
-3. Start the server by running `air`.
+1. Create private key and public key for authentication purpose by running `make create-private-key`.
+2. Create a `.env` file by referencing the values provided in the `.env.example` file.
+3. Install [Air](https://github.com/air-verse/air), a live reload tool for Go.
+4. Navigate to the `./app` directory.
+5. Start the server by running `air`.
 
 ## Submission Instructions
 

@@ -5,3 +5,4 @@
 tmp
 app/cert/
 .env
+*.DS_Store
