@@ -32,7 +32,7 @@ func main() {
 		logger.Log.Error(err.Error())
 		return
 	}
-	if err := database.RunMigration(db); err != nil {
+	if err := database.RunMigration(db, "db/migrations"); err != nil {
 		logger.Log.Error(err.Error())
 		return
 	}

@@ -11,11 +11,8 @@ migration-up:
 migration-down:
 	$(goose) down
 
-test:
-	go test -v -cover ./...
-
 run:
-	docker compose up -d --build $(svc)
+	docker compose up -d --build
 
 create-private-key:
 	openssl genrsa -out $(BACKEND_TAKE_HOME_JWT_PRIVATE_KEY_PATH) 4096

@@ -4,6 +4,9 @@ import (
 	"app/domain"
 	"app/pkg/common"
 	"app/pkg/logger"
+	"net/http"
+	"net/mail"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +29,11 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	var request *domain.LoginRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
+		handleError(ctx, err)
+		return
+	}
+	if err := isValidEmail(request.Email); err != nil {
 		handleError(ctx, err)
 		return
 	}
@@ -44,7 +51,11 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	var request *domain.RegisterRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
+		handleError(ctx, err)
+		return
+	}
+	if err := isValidEmail(request.Email); err != nil {
 		handleError(ctx, err)
 		return
 	}
@@ -59,7 +70,7 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
 	tokenCookie, err := ctx.Request.Cookie("REFRESH_TOKEN")
 	if err != nil {
-		err := common.ErrInvalidToken
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		ctx.Abort()
 	}
@@ -76,4 +87,18 @@ func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
 	}
 	ctx.SetCookie("AUTHORIZATION", response.AccessToken, 0, "/", "", false, true)
 	handleOK(ctx, response)
+}
+
+func isValidEmail(email string) error {
+	if strings.Contains(email, " ") {
+		return common.NewCustomError(http.StatusBadRequest, "email address should not contain space")
+	}
+	if strings.Contains(email, "<") || strings.Contains(email, ">") {
+		return common.NewCustomError(http.StatusBadRequest, "email address should not contain < or >")
+	}
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return common.NewCustomError(http.StatusBadRequest, "invalid email address")
+	}
+	return nil
 }

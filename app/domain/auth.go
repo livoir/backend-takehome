@@ -16,9 +16,9 @@ type User struct {
 }
 
 type RegisterRequestDTO struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type RegisterResponseDTO struct {
@@ -26,8 +26,8 @@ type RegisterResponseDTO struct {
 }
 
 type LoginRequestDTO struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type LoginResponseDTO struct {

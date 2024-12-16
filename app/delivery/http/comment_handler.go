@@ -3,6 +3,7 @@ package http
 import (
 	"app/domain"
 	"app/pkg/common"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +25,7 @@ func NewCommentHandler(r *gin.RouterGroup, middleware *MiddlewareHandler, commen
 func (h *CommentHandler) CreateComment(ctx *gin.Context) {
 	var request domain.CreateCommentRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -49,7 +50,7 @@ func (h *CommentHandler) CreateComment(ctx *gin.Context) {
 func (h *CommentHandler) FindCommentsByPostID(ctx *gin.Context) {
 	var request domain.SearchParam
 	if err := ctx.ShouldBindQuery(&request); err != nil {
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -57,7 +58,7 @@ func (h *CommentHandler) FindCommentsByPostID(ctx *gin.Context) {
 		PostID int64 `uri:"postID" binding:"required"`
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}

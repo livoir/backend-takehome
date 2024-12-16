@@ -25,14 +25,14 @@ type PostRepository interface {
 
 type CreatePostRequestDTO struct {
 	AuthorID int64  `json:"-"`
-	Title    string `json:"title"`
-	Content  string `json:"content"`
+	Title    string `json:"title" binding:"required"`
+	Content  string `json:"content" binding:"required"`
 }
 
 type UpdatePostRequestDTO struct {
 	AuthorID int64  `json:"-"`
-	Title    string `json:"title"`
-	Content  string `json:"content"`
+	Title    string `json:"title" binding:"required"`
+	Content  string `json:"content" binding:"required"`
 }
 
 type CreatePostResponseDTO struct {

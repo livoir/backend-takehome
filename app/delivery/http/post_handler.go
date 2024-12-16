@@ -4,6 +4,7 @@ import (
 	"app/domain"
 	"app/pkg/common"
 	"app/pkg/logger"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +32,7 @@ func (h *PostHandler) Create(ctx *gin.Context) {
 	var request *domain.CreatePostRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -49,7 +50,7 @@ func (h *PostHandler) Update(ctx *gin.Context) {
 	var request *domain.UpdatePostRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -58,7 +59,7 @@ func (h *PostHandler) Update(ctx *gin.Context) {
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -81,7 +82,7 @@ func (h *PostHandler) Delete(ctx *gin.Context) {
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -99,7 +100,7 @@ func (h *PostHandler) GetByID(ctx *gin.Context) {
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}
@@ -115,7 +116,7 @@ func (h *PostHandler) GetAll(ctx *gin.Context) {
 	var search domain.SearchParam
 	if err := ctx.ShouldBindQuery(&search); err != nil {
 		logger.Log.Error(err.Error())
-		err = common.ErrInvalidParam
+		err = common.NewCustomError(http.StatusBadRequest, err.Error())
 		handleError(ctx, err)
 		return
 	}

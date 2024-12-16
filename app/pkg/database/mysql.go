@@ -20,9 +20,9 @@ func NewMysqlConnection(host, port, dbName, user, password string) (*sql.DB, err
 	return db, nil
 }
 
-func RunMigration(db *sql.DB) error {
+func RunMigration(db *sql.DB, migrationDir string) error {
 	goose.SetDialect("mysql")
-	err := goose.Up(db, "db/migrations")
+	err := goose.Up(db, migrationDir)
 	if err != nil {
 		logger.Log.Error("Error running migration: ", zap.Error(err))
 		return err

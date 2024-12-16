@@ -20,7 +20,7 @@ type CommentRepository interface {
 
 type CreateCommentRequestDTO struct {
 	AuthorID int64  `json:"-"`
-	Content  string `json:"content"`
+	Content  string `json:"content" binding:"required"`
 }
 
 type CreateCommentResponseDTO struct {
