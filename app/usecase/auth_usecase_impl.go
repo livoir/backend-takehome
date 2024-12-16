@@ -93,7 +93,15 @@ func (uc *AuthUseCaseImpl) Register(ctx context.Context, request *domain.Registe
 	if err != nil {
 		return nil, err
 	}
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
 	response := &domain.RegisterResponseDTO{ID: user.ID}
 	return response, nil
+}
+
+// VerifyToken implements domain.AuthUseCase.
+func (uc *AuthUseCaseImpl) VerifyToken(ctx context.Context, token string) (*domain.VerifyTokenResponse, error) {
+	return uc.tokenRepository.Verify(ctx, token)
 }

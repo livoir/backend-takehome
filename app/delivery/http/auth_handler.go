@@ -3,6 +3,7 @@ package http
 import (
 	"app/domain"
 	"app/pkg/common"
+	"app/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,7 @@ func NewAuthHandler(r *gin.RouterGroup, authUseCase domain.AuthUseCase) {
 func (h *AuthHandler) Login(ctx *gin.Context) {
 	var request *domain.LoginRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
+		logger.Log.Error(err.Error())
 		err = common.ErrInvalidParam
 		handleError(ctx, err)
 		return
@@ -40,6 +42,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var request *domain.RegisterRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
+		logger.Log.Error(err.Error())
 		err = common.ErrInvalidParam
 		handleError(ctx, err)
 		return

@@ -12,14 +12,14 @@ import (
 )
 
 type TokenRepositoryJWT struct {
-	privateKeyPath string
-	publicKeyPath  string
+	privateKey string
+	publicKey  string
 }
 
 func NewTokenRepositoryJWT(privateKey, publicKey string) domain.TokenRepository {
 	return &TokenRepositoryJWT{
-		privateKeyPath: privateKey,
-		publicKeyPath:  publicKey,
+		privateKey: privateKey,
+		publicKey:  publicKey,
 	}
 }
 
@@ -32,7 +32,7 @@ func (repository *TokenRepositoryJWT) Create(ctx context.Context, token *domain.
 		"iat": now.Unix(),
 		"nbf": now.Unix(),
 	}
-	key, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(repository.privateKeyPath))
+	key, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(repository.privateKey))
 	if err != nil {
 		logger.Log.Error("failed to parse private key", zap.Error(err))
 		return "", common.ErrInternalServerError
@@ -43,4 +43,34 @@ func (repository *TokenRepositoryJWT) Create(ctx context.Context, token *domain.
 		return "", common.ErrInternalServerError
 	}
 	return res, nil
+}
+
+// Verify implements domain.TokenRepository.
+func (repository *TokenRepositoryJWT) Verify(ctx context.Context, token string) (*domain.VerifyTokenResponse, error) {
+	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(repository.publicKey))
+	if err != nil {
+		logger.Log.Error("failed to parse public key", zap.Error(err))
+		return nil, common.ErrInternalServerError
+	}
+	tok, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, common.ErrInvalidTokenMethod
+		}
+		return key, nil
+	})
+	if err != nil {
+		logger.Log.Error("failed to parse token", zap.Error(err))
+		return nil, common.ErrInvalidToken
+	}
+	claims, ok := tok.Claims.(jwt.MapClaims)
+	if !ok || !tok.Valid {
+		return nil, common.ErrInvalidToken
+	}
+	userID, ok := claims["dat"].(map[string]interface{})["id"].(float64)
+	if !ok {
+		return nil, common.ErrInvalidToken
+	}
+	return &domain.VerifyTokenResponse{
+		UserID: int64(userID),
+	}, nil
 }

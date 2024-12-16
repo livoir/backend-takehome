@@ -11,6 +11,11 @@ var (
 	ErrInvalidPassword     = NewCustomError(http.StatusBadRequest, "Invalid password")
 	ErrUserNotFound        = NewCustomError(http.StatusNotFound, "User not found")
 	ErrInvalidParam        = NewCustomError(http.StatusBadRequest, "Invalid parameter")
+	ErrPostNotFound        = NewCustomError(http.StatusNotFound, "Post not found")
+	ErrUnauthorized        = NewCustomError(http.StatusUnauthorized, "Unauthorized")
+	ErrInvalidTokenMethod  = NewCustomError(http.StatusUnauthorized, "Invalid token method")
+	ErrInvalidToken        = NewCustomError(http.StatusUnauthorized, "Invalid token")
+	ErrPostOwnerMismatch   = NewCustomError(http.StatusForbidden, "Post owner mismatch")
 )
 
 type CustomError struct {
