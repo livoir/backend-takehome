@@ -18,6 +18,7 @@ func NewAuthHandler(r *gin.RouterGroup, authUseCase domain.AuthUseCase) {
 	}
 	r.POST("/login", handler.Login)
 	r.POST("/register", handler.Register)
+	r.POST("/refresh-token", handler.RefreshToken)
 
 }
 
@@ -53,4 +54,26 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 	handleOKCreated(ctx, response)
+}
+
+func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
+	tokenCookie, err := ctx.Request.Cookie("REFRESH_TOKEN")
+	if err != nil {
+		err := common.ErrInvalidToken
+		handleError(ctx, err)
+		ctx.Abort()
+	}
+	token := tokenCookie.Value
+	if token == "" {
+		err := common.ErrInvalidToken
+		handleError(ctx, err)
+		ctx.Abort()
+	}
+	response, err := h.AuthUseCase.RefreshToken(ctx, token)
+	if err != nil {
+		handleError(ctx, err)
+		return
+	}
+	ctx.SetCookie("AUTHORIZATION", response.AccessToken, 0, "/", "", false, true)
+	handleOK(ctx, response)
 }

@@ -105,3 +105,25 @@ func (uc *AuthUseCaseImpl) Register(ctx context.Context, request *domain.Registe
 func (uc *AuthUseCaseImpl) VerifyToken(ctx context.Context, token string) (*domain.VerifyTokenResponse, error) {
 	return uc.tokenRepository.Verify(ctx, token)
 }
+
+// RefreshToken implements domain.AuthUseCase.
+func (uc *AuthUseCaseImpl) RefreshToken(ctx context.Context, token string) (*domain.RefreshTokenResponse, error) {
+	verifiedToken, err := uc.tokenRepository.Verify(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+	data := map[string]interface{}{
+		"id": verifiedToken.UserID,
+	}
+	tokenRequest := &domain.TokenRequest{
+		Data:      data,
+		ExpiresIn: time.Duration(10) * time.Minute,
+	}
+	newToken, err := uc.tokenRepository.Create(ctx, tokenRequest)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.RefreshTokenResponse{
+		AccessToken: newToken,
+	}, nil
+}
