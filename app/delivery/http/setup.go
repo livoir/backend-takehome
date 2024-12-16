@@ -19,12 +19,18 @@ func SetupRouter(db *sql.DB, jwtPrivateKey, jwtPublicKey string) (*gin.Engine, e
 	tokenRepository := repository.NewTokenRepositoryJWT(jwtPrivateKey, jwtPublicKey)
 	userRepository := repository.NewUserRepositoryMySQL(db)
 	postRepository := repository.NewPostRepositoryMySQL(db)
+	commentRepository := repository.NewCommentRepositoryMySQL(db)
 
 	authUseCase := usecase.NewAuthUseCaseImpl(userRepository, tokenRepository, transactor)
-	postUseCase := usecase.NewPostUsecaseImpl(postRepository, transactor)
+	postUseCase := usecase.NewPostUsecaseImpl(postRepository, userRepository, transactor)
+	commentUseCase := usecase.NewCommentUseCaseImpl(commentRepository, userRepository, postRepository, transactor)
 
 	middleware := NewMiddlewareHandler(authUseCase)
-	NewAuthHandler(r.Group(""), authUseCase)
-	NewPostHandler(r.Group("/posts"), middleware, postUseCase)
+	authGroup := r.Group("")
+	postGroup := r.Group("/posts")
+	commentGroup := r.Group("/posts/:postID/comments")
+	NewAuthHandler(authGroup, authUseCase)
+	NewPostHandler(postGroup, middleware, postUseCase)
+	NewCommentHandler(commentGroup, middleware, commentUseCase)
 	return r, nil
 }

@@ -20,7 +20,7 @@ type PostRepository interface {
 	GetByID(ctx context.Context, id int64) (*Post, error)
 	SelectForUpdate(ctx context.Context, tx Transaction, id int64) (*Post, error)
 	Update(ctx context.Context, tx Transaction, id int64, post *Post) error
-	GetAll(ctx context.Context, search SearchParam) ([]Post, error)
+	GetAll(ctx context.Context, search SearchParam) ([]Post, int64, error)
 }
 
 type CreatePostRequestDTO struct {
@@ -61,5 +61,5 @@ type PostUseCase interface {
 	GetByID(ctx context.Context, id int64) (*Post, error)
 	Update(ctx context.Context, id int64, post *UpdatePostRequestDTO) (*UpdatePostResponseDTO, error)
 	Delete(ctx context.Context, id int64, post *DeletePostRequestDTO) error
-	GetAll(ctx context.Context, search SearchParam) ([]Post, error)
+	GetAll(ctx context.Context, search SearchParam) ([]Post, int64, error)
 }

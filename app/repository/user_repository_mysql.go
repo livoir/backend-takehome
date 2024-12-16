@@ -51,7 +51,7 @@ func (repository *UserRepositoryMySQL) FindByEmail(ctx context.Context, email st
 }
 
 // FindByID implements domain.UserRepository.
-func (repository *UserRepositoryMySQL) FindByID(ctx context.Context, id int) (*domain.User, error) {
+func (repository *UserRepositoryMySQL) FindByID(ctx context.Context, id int64) (*domain.User, error) {
 	var user domain.User
 	err := repository.sql.QueryRowContext(ctx, "SELECT id, name, email, password_hash FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash)
 	if err != nil {

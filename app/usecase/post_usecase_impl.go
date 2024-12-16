@@ -4,18 +4,19 @@ import (
 	"app/domain"
 	"app/pkg/common"
 	"context"
-	"fmt"
 	"time"
 )
 
 type PostUsecaseImpl struct {
 	postRepository domain.PostRepository
+	userRepository domain.UserRepository
 	transactor     domain.Transactor
 }
 
-func NewPostUsecaseImpl(postRepository domain.PostRepository, transactor domain.Transactor) domain.PostUseCase {
+func NewPostUsecaseImpl(postRepository domain.PostRepository, userRepository domain.UserRepository, transactor domain.Transactor) domain.PostUseCase {
 	return &PostUsecaseImpl{
 		postRepository: postRepository,
+		userRepository: userRepository,
 		transactor:     transactor,
 	}
 }
@@ -28,6 +29,13 @@ func (uc *PostUsecaseImpl) Create(ctx context.Context, post *domain.CreatePostRe
 		return nil, err
 	}
 	defer tx.Rollback()
+	user, err := uc.userRepository.FindByID(ctx, post.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, common.ErrUserNotFound
+	}
 	postModel := &domain.Post{
 		Title:    post.Title,
 		Content:  post.Content,
@@ -59,7 +67,6 @@ func (uc *PostUsecaseImpl) Delete(ctx context.Context, id int64, post *domain.De
 	}
 	defer tx.Rollback()
 	postModel, err := uc.postRepository.SelectForUpdate(ctx, tx, id)
-	fmt.Println(postModel, err)
 	if err != nil {
 		return err
 	}
@@ -83,12 +90,12 @@ func (uc *PostUsecaseImpl) Delete(ctx context.Context, id int64, post *domain.De
 }
 
 // GetAll implements domain.PostUseCase.
-func (uc *PostUsecaseImpl) GetAll(ctx context.Context, search domain.SearchParam) ([]domain.Post, error) {
-	posts, err := uc.postRepository.GetAll(ctx, search)
+func (uc *PostUsecaseImpl) GetAll(ctx context.Context, search domain.SearchParam) ([]domain.Post, int64, error) {
+	posts, total, err := uc.postRepository.GetAll(ctx, search)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return posts, nil
+	return posts, total, nil
 }
 
 // GetByID implements domain.PostUseCase.
@@ -119,7 +126,6 @@ func (uc *PostUsecaseImpl) Update(ctx context.Context, id int64, post *domain.Up
 		return nil, common.ErrPostNotFound
 	}
 	if postModel.AuthorID != post.AuthorID {
-		fmt.Println(postModel.AuthorID, post.AuthorID)
 		return nil, common.ErrPostOwnerMismatch
 	}
 	now := time.Now()

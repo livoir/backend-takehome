@@ -34,8 +34,8 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		handleError(ctx, err)
 		return
 	}
-	ctx.SetCookie("AUTHORIZATION", response.AccessToken, 300, "/", "", false, true)
-	ctx.SetCookie("REFRESH_TOKEN", response.RefreshToken, 3600*24*7, "/", "", false, true)
+	ctx.SetCookie("AUTHORIZATION", response.AccessToken, 0, "/", "", false, true)
+	ctx.SetCookie("REFRESH_TOKEN", response.RefreshToken, 0, "/", "", false, true)
 	handleOK(ctx, response)
 }
 
@@ -52,5 +52,5 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		handleError(ctx, err)
 		return
 	}
-	handleOK(ctx, response)
+	handleOKCreated(ctx, response)
 }

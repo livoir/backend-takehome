@@ -16,15 +16,15 @@ func NewPostHandler(r *gin.RouterGroup, middleware *MiddlewareHandler, postUseCa
 	handler := &PostHandler{
 		postUseCase: postUseCase,
 	}
-	r.GET("/:id", handler.GetByID)
+	r.GET("/:postID", handler.GetByID)
 	r.GET("", handler.GetAll)
 
 	// Apply middleware
 	r.Use(middleware.AuthMiddleware)
 
 	r.POST("", handler.Create)
-	r.PUT("/:id", handler.Update)
-	r.DELETE("/:id", handler.Delete)
+	r.PUT("/:postID", handler.Update)
+	r.DELETE("/:postID", handler.Delete)
 }
 
 func (h *PostHandler) Create(ctx *gin.Context) {
@@ -42,7 +42,7 @@ func (h *PostHandler) Create(ctx *gin.Context) {
 		handleError(ctx, err)
 		return
 	}
-	handleOK(ctx, response)
+	handleOKCreated(ctx, response)
 }
 
 func (h *PostHandler) Update(ctx *gin.Context) {
@@ -54,7 +54,7 @@ func (h *PostHandler) Update(ctx *gin.Context) {
 		return
 	}
 	var path struct {
-		ID int64 `uri:"id" binding:"required"`
+		PostID int64 `uri:"postID" binding:"required"`
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
 		logger.Log.Error(err.Error())
@@ -63,7 +63,7 @@ func (h *PostHandler) Update(ctx *gin.Context) {
 		return
 	}
 	request.AuthorID = ctx.GetInt64("userID")
-	response, err := h.postUseCase.Update(ctx, path.ID, request)
+	response, err := h.postUseCase.Update(ctx, path.PostID, request)
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -77,7 +77,7 @@ func (h *PostHandler) Delete(ctx *gin.Context) {
 		AuthorID: userID,
 	}
 	var path struct {
-		ID int64 `uri:"id" binding:"required"`
+		PostID int64 `uri:"postID" binding:"required"`
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
 		logger.Log.Error(err.Error())
@@ -85,7 +85,7 @@ func (h *PostHandler) Delete(ctx *gin.Context) {
 		handleError(ctx, err)
 		return
 	}
-	err := h.postUseCase.Delete(ctx, path.ID, request)
+	err := h.postUseCase.Delete(ctx, path.PostID, request)
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -95,7 +95,7 @@ func (h *PostHandler) Delete(ctx *gin.Context) {
 
 func (h *PostHandler) GetByID(ctx *gin.Context) {
 	var path struct {
-		ID int64 `uri:"id" binding:"required"`
+		PostID int64 `uri:"postID" binding:"required"`
 	}
 	if err := ctx.ShouldBindUri(&path); err != nil {
 		logger.Log.Error(err.Error())
@@ -103,7 +103,7 @@ func (h *PostHandler) GetByID(ctx *gin.Context) {
 		handleError(ctx, err)
 		return
 	}
-	response, err := h.postUseCase.GetByID(ctx, path.ID)
+	response, err := h.postUseCase.GetByID(ctx, path.PostID)
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -119,10 +119,16 @@ func (h *PostHandler) GetAll(ctx *gin.Context) {
 		handleError(ctx, err)
 		return
 	}
-	response, err := h.postUseCase.GetAll(ctx, search)
+	if search.Limit == 0 {
+		search.Limit = 10
+	}
+	if search.Page == 0 {
+		search.Page = 1
+	}
+	response, total, err := h.postUseCase.GetAll(ctx, search)
 	if err != nil {
 		handleError(ctx, err)
 		return
 	}
-	handleOK(ctx, response)
+	handlePagination(ctx, response, search.Page, search.Limit, total)
 }
